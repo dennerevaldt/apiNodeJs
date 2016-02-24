@@ -5,8 +5,8 @@ var express = require('express'),
     router  = express.Router();
 
 // var mongoose = require('../db/mongoose');
-// var UserModel = require('../models/UserModel');
-var UserController = require('../controllers/UserController');
+var UserModel = require('../models/UserModel');
+var UserController = require('../controllers/UserController')(UserModel);
 
 var middlewareAuth = function(request, response, next) {
 	var token = request.query.token || request.headers['x-access-token'];
@@ -35,7 +35,6 @@ var middlewareAuth = function(request, response, next) {
 router.get('/', middlewareAuth, UserController.getAll.bind(UserController));
 router.get('/:_id', middlewareAuth, UserController.getById.bind(UserController));
 router.post('/', middlewareAuth, UserController.create.bind(UserController));
-router.post('/token', UserController.token.bind(UserController));
 router.put('/:_id', middlewareAuth, UserController.update.bind(UserController));
 router.delete('/:_id', middlewareAuth, UserController.remove.bind(UserController));
 
