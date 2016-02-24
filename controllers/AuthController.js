@@ -9,6 +9,30 @@ function AuthController(UserModel) {
     this.model = Promise.promisifyAll(UserModel);
 }
 
+AuthController.prototype.middlewareAuth = function(request, response, next) {
+  var token = request.query.token || request.headers['x-access-token'];
+  if(!token) {
+    var err = new Error('Forbidden');
+    err.status = 403;
+    return next(err);
+  }
+  try {
+    var decoded = jwt.decode(token, config.get('jwtTokenSecret'));
+    var isExpired = moment(decoded.exp).isBefore(new Date());
+    if(isExpired) {
+        var err = new Error('Unauthorized');
+        err.status = 401;
+        return next(err);
+    } else {
+        request.user = decoded.user;
+        console.log(request.user);
+        next();
+    }
+  } catch(err) {
+    return next(err);
+  }
+};
+
 AuthController.prototype.token = function(request, response, next) {
     var username = request.body.username;
     var password = request.body.password;
