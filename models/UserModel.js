@@ -2,8 +2,8 @@
 
 var mongoose = require('../db/mongoose');
 
-function UserDAO() {
-	this.model = mongoose;
+function UserDAO(model) {
+	this.model = model;
 }
 
 UserDAO.prototype.create = function(data, callback) {
@@ -36,10 +36,8 @@ UserDAO.prototype.remove = function(_id, callback) {
   	});
 };
 
-module.exports = function(mongoose) {
-	var User = mongoose.model('User', {
-	    username: String,
-	    password: String
-  	});
-  	return new UserDAO(User);
-};
+var User = mongoose.model('User', {
+    username: String,
+    password: String
+});
+module.exports = new UserDAO(User);

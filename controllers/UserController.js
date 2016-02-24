@@ -1,10 +1,6 @@
 var debug = require('debug')('api:ctrluser');
-var jwt   = require('jwt-simple'),
-  moment  = require('moment'),
-  config  = require('config');
 
 var Promise = require('bluebird');
-var UserModel = require('../models/UserModel');
 
 var handleNotFound = function(data) {
     if(!data) {
@@ -15,7 +11,7 @@ var handleNotFound = function(data) {
     return data;
 };
 
-function UserController() {
+function UserController(UserModel) {
     this.model = Promise.promisifyAll(UserModel);
 }
 
@@ -34,7 +30,7 @@ UserController.prototype.getById = function(request, response, next) {
         .then(function(data){
             response.json(data);
         })
-    .catch(next); 
+    .catch(next);
 };
 
 UserController.prototype.create = function(request, response, next) {
@@ -63,33 +59,6 @@ UserController.prototype.remove = function(request, response, next) {
             response.json(data);
         })
     .catch(next);
-};
-
-UserController.prototype.token = function(request, response, next) {
-    var username = request.body.username;
-    var password = request.body.password;
-
-    this.model.findAsync(request.body)
-          .then(function(data) {
-          
-              if (data.length) {
-                  var expires = moment().add(7, 'days').valueOf();
-                  var token = jwt.encode({
-                      user: username,
-                      exp: expires
-                  }, config.get('jwtTokenSecret'));
-
-                  response.json({
-                      token: token
-                  });
-              } else {
-                  var err = new Error('Unauthorized');
-                  err.status = 401;
-                  next(err);
-              }
-
-          })
-      .catch(next);
 };
 
 module.exports = function(UserModel) {
